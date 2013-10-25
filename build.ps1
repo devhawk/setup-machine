@@ -1,31 +1,35 @@
 function encode($scriptName) {
- 
  $command = get-content $scriptName
  $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
  return [Convert]::ToBase64String($bytes)
 }
 
+$psexe = "%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe"
+$pswowexe = "%SystemRoot%\syswow64\WindowsPowerShell\v1.0\powershell.exe"
+
 $scripts = @('setup-console-defaults.ps1', 'remove-console-props.ps1', 'install-chocolatey.ps1', 'install-choco-packages.ps1')
 $preamble = @"
 @echo off
 
-echo Updating PowerShell execution Policy
-%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe -noprofile Set-ExecutionPolicy RemoteSigned -Force
+echo DevHawk Setup-Machine
+REM source for this script available at http://github.com/devhawk/setup-machine
 
-IF NOT EXIST %SystemRoot%\syswow64\WindowsPowerShell\v1.0\powershell.exe  GOTO SkipWow64
+echo Updating PowerShell execution Policy
+$psexe -noprofile Set-ExecutionPolicy RemoteSigned -Force
+
+IF NOT EXIST $pswowexe GOTO SkipWow64
 echo Updating WOW64 PowerShell execution Policy
-%SystemRoot%\syswow64\WindowsPowerShell\v1.0\powershell.exe -noprofile Set-ExecutionPolicy RemoteSigned -Force
+$pswowexe -noprofile Set-ExecutionPolicy RemoteSigned -Force
 
 :SkipWow64
 "@
 
-$filename = "foo.bat"
+$filename = "setup-machine.bat"
 
 set-content $filename $preamble
 
 $scripts | foreach {
   $encoded = encode $_
   add-content $filename "echo running $_"
-  add-content $filename "%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe -noprofile -ExecutionPolicy unrestricted -EncodedCommand $encoded`n"
-  
+  add-content $filename "$psexe -noprofile -ExecutionPolicy unrestricted -EncodedCommand $encoded`n"
 }
