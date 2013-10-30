@@ -1,5 +1,5 @@
 function encode($scriptName) {
- $command = get-content $scriptName
+ $command = get-content -raw $scriptName
  $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
  return [Convert]::ToBase64String($bytes)
 }
@@ -24,6 +24,8 @@ $pswowexe -noprofile Set-ExecutionPolicy RemoteSigned -Force
 :SkipWow64
 "@
 
+#$datestr =  (get-date).TOstring('yyyy-MM-ddTHH-mm-ss')
+#$filename = "setup-machine.$datestr.bat"
 $filename = "setup-machine.bat"
 
 set-content $filename $preamble
@@ -31,5 +33,5 @@ set-content $filename $preamble
 $scripts | foreach {
   $encoded = encode $_
   add-content $filename "echo running $_"
-  add-content $filename "$psexe -noprofile -ExecutionPolicy unrestricted -EncodedCommand $encoded`n"
+  add-content $filename "$psexe -noprofile -ExecutionPolicy unrestricted -EncodedCommand $encoded"
 }
