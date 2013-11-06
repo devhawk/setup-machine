@@ -4,6 +4,7 @@ cinstbat gitextensions
 cinstbat 7zip.install 
 cinstbat nodejs.install 
 cinstbat notepad2 
+cinstbat GoogleChrome
 
 #add shell command for Notepad2
 #note, using reg.exe here because you can't seem to access reg path with astrisk from PS
