@@ -21,6 +21,7 @@ reg add HKCR\*\shell\Notepad2\command /d 'n2.exe \"%1\"' /f
 
 #install remaining packages
 cinstbat gitextensions
+cinstbat kdiff3
 cinstbat 7zip.install 
 cinstbat GoogleChrome
 #cinstbat nodejs.install 
