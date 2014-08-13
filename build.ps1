@@ -7,7 +7,7 @@ function encode($scriptName) {
 $psexe = "%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe"
 $pswowexe = "%SystemRoot%\syswow64\WindowsPowerShell\v1.0\powershell.exe"
 
-$scripts = @('setup-console-defaults.ps1', 'remove-console-props.ps1', 'install-chocolatey.ps1', 'install-choco-packages.ps1')
+$scripts = @('setup-console-defaults.ps1', 'remove-console-props.ps1', 'config-machine.ps1')
 $preamble = @"
 @echo off
 
