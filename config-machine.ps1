@@ -1,4 +1,12 @@
 #------------------------------------------------------------------------------
+# Check to see if we're running as admin and relauch as admin if we are not
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+  $arguments = "& '" + $myinvocation.mycommand.definition + "'"
+  Start-Process "$psHome\powershell.exe" -Verb runAs -ArgumentList $arguments
+  break
+}
+
+#------------------------------------------------------------------------------
 # Locate top level OneDrive path
 
 if (test-path ~\onedrive) {
@@ -9,7 +17,9 @@ if (test-path ~\onedrive) {
   Write-Warning "Cannot Locate OneDrive Path"
 }
 
+#------------------------------------------------------------------------------
 # Copy profile from OneDrive to correct location in my documents
+
 $local:profileDestPath = split-path $profile
 if (!(test-path $local:profileDestPath)) {
   mkdir $local:profileDestPath | Out-Null
@@ -17,14 +27,23 @@ if (!(test-path $local:profileDestPath)) {
 $local:profileSource = join-path $local:oneDrivePath "Scripts\Microsoft.PowerShell_profile.ps1"
 Copy-Item $local:profileSource $PROFILE
 
-# Configure shell to include Open with Notepad2 context menu item
+#------------------------------------------------------------------------------
+# Configure shell to include "Open with Notepad2" item on all context menus 
+
 $local:n2path = join-path $local:oneDrivePath "Utilities\Notepad2.exe"
 if (test-path $local:n2path) {
-  reg add HKCR\*\shell\Notepad2 /d "Open with Notepad2" /f
-  reg add HKCR\*\shell\Notepad2\command /d "$local:n2path `"`"%1`"`"" /f
+  reg add HKCR\*\shell\Notepad2 /d "Open with Notepad2" /f | Out-Null
+  reg add HKCR\*\shell\Notepad2\command /d "$local:n2path `"`"%1`"`"" /f | Out-Null
 }
 
+#------------------------------------------------------------------------------
+# Configure shell to include Run as Administrator for .ps1 files
+
+New-Item -Path "Registry::HKEY_CLASSES_ROOT\Microsoft.PowershellScript.1\Shell\runas\command" -Force -Name '' -Value "`"$pshome\powershell.exe`" `"%1`"" | Out-Null
+
+#------------------------------------------------------------------------------
 # Configure git global settings 
+
 $local:gitpath = join-path $local:oneDrivePath "Utilities\Git\cmd\git.exe"
 if (test-path $local:gitpath) {
   & $local:gitpath config --global user.name "Harry Pierson"
@@ -34,4 +53,3 @@ if (test-path $local:gitpath) {
   & $local:gitpath config --global alias.co checkout
   & $local:gitpath config --global alias.ci commit
 }
-
