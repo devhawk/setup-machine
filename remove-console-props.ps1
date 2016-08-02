@@ -12,7 +12,7 @@ if (-not (Test-Administrator))
   exit;
 }
 
-$shelllinkAPI = @"
+add-type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 
@@ -92,23 +92,25 @@ namespace DevHawk {
         public const uint CONSOLE_PROPS = 0xA0000002;
     }
 }
-"@
+'@
 
-add-type -TypeDefinition $shelllinkAPI
-
-dir "C:\ProgramData\Microsoft\Windows\Start Menu\" -Recurse -Include *.lnk | %{
-    $name = $_.Name
-    
-    Try
-    {
-        $shellLink = new-object -ComObject lnkfile
-        [DevHawk.ShellLink]::Load($shellLink, $_.FullName, 2);
-        [DevHawk.ShellLink]::RemoveDataBlock($shellLink, [DevHawk.ShellLink]::CONSOLE_PROPS);
-        [DevHawk.ShellLink]::Save($shellLink);
+function update-startmenu ($path) 
+{
+    dir $path -Recurse -Include *.lnk | %{
+        $name = $_.FullName
+        Try
+        {
+            $shellLink = new-object -ComObject lnkfile
+            [DevHawk.ShellLink]::Load($shellLink, $name, 2);
+            [DevHawk.ShellLink]::RemoveDataBlock($shellLink, [DevHawk.ShellLink]::CONSOLE_PROPS);
+            [DevHawk.ShellLink]::Save($shellLink);
+        }
+        Catch [System.Exception]
+        {
+            write-host "  couldn't update $name"
+        }
     }
-    Catch [System.Exception]
-    {
-        write-host "  couldn't update $name"
-    }
-
 }
+
+update-startmenu "C:\ProgramData\Microsoft\Windows\Start Menu\"
+update-startmenu "$($env:appdata)\Microsoft\Windows\Start Menu\"

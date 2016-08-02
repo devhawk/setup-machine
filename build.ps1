@@ -7,7 +7,7 @@ function encode($scriptName) {
 $psexe = "%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe"
 $pswowexe = "%SystemRoot%\syswow64\WindowsPowerShell\v1.0\powershell.exe"
 
-$scripts = @('setup-console-defaults.ps1', 'remove-console-props.ps1', 'config-machine.ps1')
+$scripts = @('setup-console-defaults.ps1', 'remove-console-props.ps1') 
 $preamble = @"
 @echo off
 
@@ -26,7 +26,7 @@ $pswowexe -noprofile Set-ExecutionPolicy RemoteSigned -Force
 
 #$datestr =  (get-date).TOstring('yyyy-MM-ddTHH-mm-ss')
 #$filename = "setup-machine.$datestr.bat"
-$filename = "setup-machine.bat"
+$filename = "update-powershell-console.bat"
 
 set-content $filename $preamble
 
